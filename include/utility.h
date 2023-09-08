@@ -9,27 +9,30 @@
 #include "lidar.h"
 
 struct PointCloudMessage;
-struct Odometry;
+struct OdometryMessage;
 
 extern std::queue<PointCloudMessage> pointCloudInBuf;
 extern std::queue<PointCloudMessage> pointCloudFilteredBuf;
 extern std::queue<PointCloudMessage> pointCloudEdgeBuf;
 extern std::queue<PointCloudMessage> pointCloudSurfBuf;
+extern std::queue<OdometryMessage> laserOdometryBuf;
 
 extern std::mutex pointCloudInBuf_mutex;
 extern std::mutex pointCloudFilteredBuf_mutex;
 extern std::mutex pointCloudEdgeBuf_mutex;
 extern std::mutex pointCloudSurfBuf_mutex;
+extern std::mutex laserOdometryBuf_mutex;
 
 extern lidar::Lidar lidar_param;
 
-extern int buffer_size;
+extern std::size_t buffer_size;
 
 
-struct Odometry
+struct OdometryMessage
 {   
     std::string topic;
     std::string frame_id;
+    std::string child_frame_id;
     double timestamp;
     double orientationX;
     double orientationY;

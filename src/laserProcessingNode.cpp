@@ -69,7 +69,7 @@ void laserProcessingNode::laser_processing()
                     pointCloudSurfBuf.push(pointcloud_surf_msg);
                     pointCloudSurfBuf_mutex.unlock();
 
-                    std::cout << "Publish Filtered, Edge, and Surf cloud" << std::endl;
+                    std::cout << pointcloud_in_msg.timestamp << ": Publish Filtered, Edge, and Surf cloud" << std::endl;
 
                     break;
                 }
