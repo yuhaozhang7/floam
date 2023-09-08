@@ -2,49 +2,87 @@
 // Email wh200720041@gmail.com
 // Homepage https://wanghan.pro
 
-//c++ lib
-#include <cmath>
-#include <vector>
-#include <mutex>
-#include <queue>
-#include <thread>
-#include <chrono>
+#include "laserProcessingNode.h"
 
-//ros lib
-#include <ros/ros.h>
-#include <sensor_msgs/Imu.h>
-#include <sensor_msgs/PointCloud2.h>
-#include <nav_msgs/Odometry.h>
-#include <tf/transform_datatypes.h>
-#include <tf/transform_broadcaster.h>
-
-//pcl lib
-#include <pcl_conversions/pcl_conversions.h>
-#include <pcl/point_cloud.h>
-#include <pcl/point_types.h>
-
-//local lib
-#include "lidar.h"
-#include "laserProcessingClass.h"
-
-
-LaserProcessingClass laserProcessing;
-std::mutex mutex_lock;
-std::queue<sensor_msgs::PointCloud2ConstPtr> pointCloudBuf;
-lidar::Lidar lidar_param;
-
-ros::Publisher pubEdgePoints;
-ros::Publisher pubSurfPoints;
-ros::Publisher pubLaserCloudFiltered;
-
-void velodyneHandler(const sensor_msgs::PointCloud2ConstPtr &laserCloudMsg)
+void laserProcessingNode::adjustLaserMappingInput(const PointCloudMessage &laserCloud)
 {
-    mutex_lock.lock();
-    pointCloudBuf.push(laserCloudMsg);
-    mutex_lock.unlock();
-   
+    pointCloudInBuf_mutex.lock();
+    pointCloudInBuf.push(laserCloud);
+    pointCloudInBuf_mutex.unlock();
 }
 
+
+void laserProcessingNode::laser_processing()
+{
+    while (1)
+    {
+        if (!pointCloudInBuf.empty())
+        {
+            // read data
+            pointCloudInBuf_mutex.lock();
+            pointcloud_in_msg = pointCloudInBuf.front();
+            pointCloudInBuf.pop();
+            pointCloudInBuf_mutex.unlock();
+
+            pcl::PointCloud<pcl::PointXYZI>::Ptr pointcloud_edge(new pcl::PointCloud<pcl::PointXYZI>());
+            pcl::PointCloud<pcl::PointXYZI>::Ptr pointcloud_surf(new pcl::PointCloud<pcl::PointXYZI>());
+
+            std::chrono::time_point<std::chrono::system_clock> start, end;
+            start = std::chrono::system_clock::now();
+
+            laserProcessing.featureExtraction(pointcloud_in_msg.cloud, pointcloud_edge, pointcloud_surf);
+
+            pcl::PointCloud<pcl::PointXYZI>::Ptr pointcloud_filtered(new pcl::PointCloud<pcl::PointXYZI>());  
+            *pointcloud_filtered+=*pointcloud_edge;
+            *pointcloud_filtered+=*pointcloud_surf;
+
+            // Publish pointcloud_filtered_msg
+            pointcloud_filtered_msg.timestamp = pointcloud_in_msg.timestamp;
+            pointcloud_filtered_msg.frame_id = "base_link";
+            pointcloud_filtered_msg.cloud = pointcloud_filtered;
+            
+
+            // Publish pointcloud_edge_msg
+            pointcloud_edge_msg.timestamp = pointcloud_in_msg.timestamp;
+            pointcloud_edge_msg.frame_id = "base_link";
+            pointcloud_edge_msg.cloud = pointcloud_edge;
+            
+
+            // Publish pointcloud_surf_msg
+            pointcloud_surf_msg.timestamp = pointcloud_in_msg.timestamp;
+            pointcloud_surf_msg.frame_id = "base_link";
+            pointcloud_surf_msg.cloud = pointcloud_surf;
+            
+
+            while (true) {
+                if (pointCloudFilteredBuf.size() < buffer_size && pointCloudEdgeBuf.size() < buffer_size && pointCloudSurfBuf.size() < buffer_size) {
+
+                    pointCloudFilteredBuf_mutex.lock();
+                    pointCloudFilteredBuf.push(pointcloud_filtered_msg);
+                    pointCloudFilteredBuf_mutex.unlock();
+
+                    pointCloudEdgeBuf_mutex.lock();
+                    pointCloudEdgeBuf.push(pointcloud_edge_msg);
+                    pointCloudEdgeBuf_mutex.unlock();
+
+                    pointCloudSurfBuf_mutex.lock();
+                    pointCloudSurfBuf.push(pointcloud_surf_msg);
+                    pointCloudSurfBuf_mutex.unlock();
+
+                    std::cout << "Publish Filtered, Edge, and Surf cloud" << std::endl;
+
+                    break;
+                }
+                std::this_thread::sleep_for(std::chrono::milliseconds(100));
+            }
+
+        }
+        std::chrono::milliseconds dura(2);
+        std::this_thread::sleep_for(dura);
+    }
+}
+
+/*
 double total_time =0;
 int total_frame=0;
 
@@ -101,6 +139,7 @@ void laser_processing(){
     }
 }
 
+
 int main(int argc, char **argv)
 {
     ros::init(argc, argv, "main");
@@ -139,5 +178,5 @@ int main(int argc, char **argv)
     ros::spin();
 
     return 0;
-}
+} */
 
