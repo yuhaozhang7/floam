@@ -71,7 +71,7 @@ void OdomEstimationClass::updatePointsToMap(const pcl::PointCloud<pcl::PointXYZI
 
         }
     }else{
-        printf("not enough points in map to associate, map error");
+        printf("not enough points in map to associate, map error\n");
     }
     odom = Eigen::Isometry3d::Identity();
     odom.linear() = q_w_curr.toRotationMatrix();
@@ -147,7 +147,7 @@ void OdomEstimationClass::addEdgeCostFactor(const pcl::PointCloud<pcl::PointXYZI
         }
     }
     if(corner_num<20){
-        printf("not enough correct points");
+        printf("not enough correct points\n");
     }
 
 }
@@ -202,7 +202,7 @@ void OdomEstimationClass::addSurfCostFactor(const pcl::PointCloud<pcl::PointXYZI
 
     }
     if(surf_num<20){
-        printf("not enough correct points");
+        printf("not enough correct points\n");
     }
 
 }

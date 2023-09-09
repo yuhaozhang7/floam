@@ -3,6 +3,9 @@
 #include <iostream>
 #include <queue>
 #include <mutex>
+#include <thread>
+#include <chrono>
+#include <stdexcept>
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
 
@@ -15,18 +18,25 @@ extern std::queue<PointCloudMessage> pointCloudInBuf;
 extern std::queue<PointCloudMessage> pointCloudFilteredBuf;
 extern std::queue<PointCloudMessage> pointCloudEdgeBuf;
 extern std::queue<PointCloudMessage> pointCloudSurfBuf;
+extern std::queue<PointCloudMessage> pointCloudMapBuf;
 extern std::queue<OdometryMessage> laserOdometryBuf;
+extern std::queue<OdometryMessage> finalOdometryBuf;
 
 extern std::mutex pointCloudInBuf_mutex;
 extern std::mutex pointCloudFilteredBuf_mutex;
 extern std::mutex pointCloudEdgeBuf_mutex;
 extern std::mutex pointCloudSurfBuf_mutex;
+extern std::mutex pointCloudMapBuf_mutex;
 extern std::mutex laserOdometryBuf_mutex;
+extern std::mutex finalOdometryBuf_mutex;
+
+extern std::atomic<bool> stopFlag;
 
 extern lidar::Lidar lidar_param;
 
 extern std::size_t buffer_size;
 
+std::pair<OdometryMessage, PointCloudMessage> getMap();
 
 struct OdometryMessage
 {   

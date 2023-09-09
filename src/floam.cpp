@@ -1,5 +1,6 @@
 #include "laserProcessingNode.h"
 #include "odomEstimationNode.h"
+#include "laserMappingNode.h"
 #include "utility.h"
 
 #include <boost/filesystem.hpp>
@@ -28,17 +29,24 @@ int main() {
     OE.odomEstimation.init(lidar_param, map_resolution);
     std::thread odom_estimation_thread(&odomEstimationNode::odom_estimation, &OE);
 
+    laserMappingNode LM;
+    LM.laserMapping.init(map_resolution);
+    std::thread laser_mapping_thread(&laserMappingNode::laser_mapping, &LM);
+
     pcl::PointCloud<pcl::PointXYZ>::Ptr trajectory(new pcl::PointCloud<pcl::PointXYZ>);
+    pcl::PointCloud<pcl::PointXYZI>::Ptr map(new pcl::PointCloud<pcl::PointXYZI>);
 
     std::string darpa_path = "/mnt/d/Download/Dataset/Cerberus/anymal1_sync/velodyne_pcd";
+    std::string newer_path = "/mnt/d/Download/Dataset/Newer/short_01_sync/ouster_scan";
     std::string kitti_path = "/mnt/d/Download/Dataset/KITTI/2011_10_03_drive_0027/2011_10_03_drive_0027_sync.dir/velodyne_points/data";
-    boost::filesystem::path directory_path("/mnt/d/Download/Dataset/Cerberus/anymal1_sync/velodyne_pcd"); // replace with your directory path
+    boost::filesystem::path directory_path("/mnt/d/Download/Dataset/Newer/short_01_sync/ouster_scan"); // replace with your directory path
 
     int count = 0;
     for (boost::filesystem::directory_iterator it(directory_path); it != boost::filesystem::directory_iterator(); ++it) {
+        
+        count++;
 
         if (count > 3000) break;
-        count++;
 
         if (boost::filesystem::is_regular_file(it->path()) && it->path().extension() == ".pcd") {\
 
@@ -63,9 +71,28 @@ int main() {
                 }
                 std::this_thread::sleep_for(std::chrono::milliseconds(100)); // sleep for a short duration before checking again
             }
+
+            auto output_pair = getMap();
+            OdometryMessage pose_msg = output_pair.first;
+            PointCloudMessage cloud_msg = output_pair.second;
+
+            if (pose_msg.timestamp == 0.0) {
+                std::cout << "Timestamp is zero!!!!!" << std::endl;
+                stopFlag.store(true);
+            } else {
+                pcl::PointXYZ point;
+                point.x = pose_msg.positionX;
+                point.y = pose_msg.positionY;
+                point.z = pose_msg.positionZ;
+                trajectory->points.push_back(point);
+
+                map = cloud_msg.cloud;
+                std::cout << pose_msg.timestamp << " " << cloud_msg.timestamp << ": Get the Output" << std::endl;
+            }
         }
     }
-
+    stopFlag.store(true);
+    /*
     while (true) {
         if (laserOdometryBuf.size() == 0) break;
 
@@ -80,9 +107,9 @@ int main() {
         point.z = pose.positionZ;
 
         trajectory->points.push_back(point);
-    }
+    } */
 
-    std::string filename = "/mnt/d/Download/Dataset/Cerberus/test.pcd";
+    std::string filename = "/mnt/d/Download/Dataset/Cerberus/trajectory_test.pcd";
     trajectory->width = trajectory->points.size();
     trajectory->height = 1;
     if (pcl::io::savePCDFile<pcl::PointXYZ>(filename, *trajectory) == -1) {
@@ -91,19 +118,17 @@ int main() {
     }
     std::cout << "Saved " << trajectory->points.size() << " data points to " << filename << "." << std::endl;
 
-    /*
-    PointCloudMessage pointCloudEdgeMsg = pointCloudSurfBuf.front();
-    pointCloudEdgeBuf.pop();
-    std::string filename = "/mnt/d/Download/Dataset/Cerberus/test.pcd";
-    if (pcl::io::savePCDFile<pcl::PointXYZI>(filename, *(pointCloudEdgeMsg.cloud)) == -1) {
+    
+    filename = "/mnt/d/Download/Dataset/Cerberus/map_test.pcd";
+    if (pcl::io::savePCDFile<pcl::PointXYZI>(filename, *map) == -1) {
         PCL_ERROR("Couldn't write to PCD file \n");
         return -1;
     }
-    std::cout << "Saved " << pointCloudEdgeMsg.cloud->points.size() << " data points to " << filename << "." << std::endl;
-    */
+    std::cout << "Saved " << map->points.size() << " data points to " << filename << "." << std::endl;
 
     laser_processing_thread.join();
     odom_estimation_thread.join();
+    laser_mapping_thread.join();
 
     return 0;
 }

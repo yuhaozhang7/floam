@@ -20,14 +20,14 @@ class laserProcessingNode
 { 
 public:
 
-    void adjustLaserMappingInput(const PointCloudMessage &laserCloud);
+    void adjustFLOAMInput(const PointCloudMessage &laserCloud);
 
     void laser_processing();
 
     PointCloudMessage pointcloud_in_msg;
-    PointCloudMessage pointcloud_filtered_msg;
-    PointCloudMessage pointcloud_edge_msg;
-    PointCloudMessage pointcloud_surf_msg;
+    // PointCloudMessage pointcloud_filtered_msg;
+    // PointCloudMessage pointcloud_edge_msg;
+    // PointCloudMessage pointcloud_surf_msg;
 
     LaserProcessingClass laserProcessing;
 

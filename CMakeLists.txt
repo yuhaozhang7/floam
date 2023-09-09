@@ -24,23 +24,8 @@ set(CERES_LIBRARIES
     ${CERES_LIBRARY_DIR}/libceres.so.1.12.0
 )
 
-file(GLOB_RECURSE FLOAM_HEADERS 
-  ./include/laserProcessingClass.h 
-  ./include/laserProcessingNode.h
-  ./include/odomEstimationClass.h
-  ./include/odomEstimationNode.h
-  ./include/lidar.h
-  ./include/lidarOptimization.h
-  ./include/utility.h)
-
-file(GLOB_RECURSE FLOAM_SOURCES
-  ./src/laserProcessingClass.cpp
-  ./src/laserProcessingNode.cpp
-  ./src/odomEstimationClass.cpp
-  ./src/odomEstimationNode.cpp
-  ./src/lidar.cpp
-  ./src/lidarOptimization.cpp
-  ./src/utility.cpp)
+file(GLOB_RECURSE FLOAM_HEADERS ./include/*.h)
+file(GLOB_RECURSE FLOAM_SOURCES ./src/*.cpp)
 
 add_library(floam_lib SHARED ${FLOAM_SOURCES} ${FLOAM_HEADERS})
 
