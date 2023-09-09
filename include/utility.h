@@ -22,6 +22,8 @@ extern std::queue<PointCloudMessage> pointCloudMapBuf;
 extern std::queue<OdometryMessage> laserOdometryBuf;
 extern std::queue<OdometryMessage> finalOdometryBuf;
 
+extern std::size_t buffer_size;
+
 extern std::mutex pointCloudInBuf_mutex;
 extern std::mutex pointCloudFilteredBuf_mutex;
 extern std::mutex pointCloudEdgeBuf_mutex;
@@ -32,11 +34,13 @@ extern std::mutex finalOdometryBuf_mutex;
 
 extern std::atomic<bool> stopFlag;
 
+extern int scan_line;
+extern double vertical_angle;
+extern double scan_period;
+extern double max_dis;
+extern double min_dis;
+extern double map_resolution;
 extern lidar::Lidar lidar_param;
-
-extern std::size_t buffer_size;
-
-std::pair<OdometryMessage, PointCloudMessage> getMap();
 
 struct OdometryMessage
 {   
@@ -51,12 +55,6 @@ struct OdometryMessage
     double positionX;
     double positionY;
     double positionZ;
-    double angularX;
-    double angularY;
-    double angularZ;
-    double linearX;
-    double linearY;
-    double linearZ;
 };
 
 struct PointCloudMessage

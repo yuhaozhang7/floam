@@ -1,0 +1,9 @@
+scan_line: 64
+vertical_angle: 2.0
+scan_period: 0.1
+max_dis: 60.0
+min_dis: 2.0
+map_resolution: 0.4
+buffer_size: 5
+dataset_name: SOME
+show_point_cloud: true

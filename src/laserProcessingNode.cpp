@@ -4,14 +4,6 @@
 
 #include "laserProcessingNode.h"
 
-void laserProcessingNode::adjustFLOAMInput(const PointCloudMessage &laserCloud)
-{
-    pointCloudInBuf_mutex.lock();
-    pointCloudInBuf.push(laserCloud);
-    pointCloudInBuf_mutex.unlock();
-}
-
-
 void laserProcessingNode::laser_processing()
 {
     while (!stopFlag.load())
@@ -58,15 +50,15 @@ void laserProcessingNode::laser_processing()
                 if (pointCloudFilteredBuf.size() < buffer_size && pointCloudEdgeBuf.size() < buffer_size && pointCloudSurfBuf.size() < buffer_size) {
 
                     pointCloudFilteredBuf_mutex.lock();
-                    pointCloudFilteredBuf.push(pointcloud_filtered_msg);
-                    pointCloudFilteredBuf_mutex.unlock();
-
                     pointCloudEdgeBuf_mutex.lock();
-                    pointCloudEdgeBuf.push(pointcloud_edge_msg);
-                    pointCloudEdgeBuf_mutex.unlock();
-
                     pointCloudSurfBuf_mutex.lock();
+
+                    pointCloudFilteredBuf.push(pointcloud_filtered_msg);
+                    pointCloudEdgeBuf.push(pointcloud_edge_msg);
                     pointCloudSurfBuf.push(pointcloud_surf_msg);
+                    
+                    pointCloudFilteredBuf_mutex.unlock();
+                    pointCloudEdgeBuf_mutex.unlock();
                     pointCloudSurfBuf_mutex.unlock();
 
                     // std::cout << pointcloud_in_msg.timestamp << ": Publish Filtered, Edge, and Surf cloud" << std::endl;

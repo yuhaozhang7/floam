@@ -52,11 +52,12 @@ void laserMappingNode::laser_mapping(){
                 if (pointCloudMapBuf.size() < buffer_size && finalOdometryBuf.size() < buffer_size) {
                     
                     finalOdometryBuf_mutex.lock();
-                    finalOdometryBuf.push(laserodom_in_msg);
-                    finalOdometryBuf_mutex.unlock();
-
                     pointCloudMapBuf_mutex.lock();
+
+                    finalOdometryBuf.push(laserodom_in_msg);
                     pointCloudMapBuf.push(pointcloud_map_msg);
+
+                    finalOdometryBuf_mutex.unlock();
                     pointCloudMapBuf_mutex.unlock();
 
                     // std::cout << pointcloud_map_msg.timestamp << ": Publish Map and Odomerty" << std::endl;

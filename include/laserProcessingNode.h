@@ -20,8 +20,6 @@ class laserProcessingNode
 { 
 public:
 
-    void adjustFLOAMInput(const PointCloudMessage &laserCloud);
-
     void laser_processing();
 
     PointCloudMessage pointcloud_in_msg;

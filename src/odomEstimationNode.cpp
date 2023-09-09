@@ -12,17 +12,21 @@ void odomEstimationNode::odom_estimation(){
 
             //read data
             pointCloudEdgeBuf_mutex.lock();
+            pointCloudSurfBuf_mutex.lock();
+
             if(!pointCloudEdgeBuf.empty() && (pointCloudEdgeBuf.front().timestamp < pointCloudSurfBuf.front().timestamp-0.5*lidar_param.scan_period)){
                 pointCloudEdgeBuf.pop();
                 std::cout << "time stamp unaligned with extra point cloud, pls check your data --> odom correction" << std::endl;
                 pointCloudEdgeBuf_mutex.unlock();
+                pointCloudSurfBuf_mutex.unlock();
                 continue;
             }
 
-            pointCloudSurfBuf_mutex.lock();
+            
             if(!pointCloudSurfBuf.empty() && (pointCloudSurfBuf.front().timestamp < pointCloudEdgeBuf.front().timestamp-0.5*lidar_param.scan_period)){
                 pointCloudSurfBuf.pop();
                 std::cout << "time stamp unaligned with extra point cloud, pls check your data --> odom correction" << std::endl;
+                pointCloudEdgeBuf_mutex.unlock();
                 pointCloudSurfBuf_mutex.unlock();
                 continue;  
             }
