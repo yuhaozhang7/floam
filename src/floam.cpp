@@ -61,7 +61,7 @@ std::pair<OdometryMessage, PointCloudMessage> FLOAM::getOutput() {
     output_odom_msg.timestamp = 0.0;
     output_map_msg.timestamp = 0.0;
 
-    while (elapsed_time.count() < 500) {
+    while (elapsed_time.count() < 5000) {
 
         finalOdometryBuf_mutex.lock();
         pointCloudMapBuf_mutex.lock();
@@ -99,7 +99,7 @@ std::pair<OdometryMessage, PointCloudMessage> FLOAM::getOutput() {
         }
         
     }
-    std::cout << "output buffer is empty for over 0.5s, set timestamp to zero" << std::endl;
+    std::cout << "output buffer is empty for over 5s, set timestamp to zero" << std::endl;
     return std::make_pair(output_odom_msg, output_map_msg);
     // throw std::runtime_error("Timeout waiting for buffers!");
 }

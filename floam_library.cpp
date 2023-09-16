@@ -152,6 +152,9 @@ bool sb_update_frame(SLAMBenchLibraryHelper *slam_settings , slambench::io::SLAM
         }
         pointCloudInMsg.cloud = cloud;
 
+        pointCloudInMsg.cloud->height = 1;
+        pointCloudInMsg.cloud->width = cloud->points.size();
+
         floam.AdjustInput(pointCloudInMsg);
 
         return true;

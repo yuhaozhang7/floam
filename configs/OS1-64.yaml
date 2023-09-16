@@ -5,5 +5,5 @@ max_dis: 60.0
 min_dis: 2.0
 map_resolution: 0.4
 buffer_size: 1
-dataset_name: KITTI
-show_point_cloud: true
+dataset_name: NewerCollege
+show_point_cloud: false
