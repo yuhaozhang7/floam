@@ -3,20 +3,6 @@ project(floam)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -O3")
 
-find_package(Boost REQUIRED COMPONENTS filesystem system)
-
-SET(WRAPPER_PATH "/deps/aloam/wrapper/")
-SET(SLAMBENCH_INCLUDE_DIR "/home/yuhao/slambench/framework/shared/include/")
-
-SET(EIGEN3_INCLUDE_DIR "/deps/aloam/eigen3/include/eigen3/")
-SET(PCL_INCLUDE_DIR "/home/yuhao/slambench/deps/pcl/include/pcl-1.8/")
-SET(CERES_INCLUDE_DIR "/deps/aloam/ceres/include/")
-SET(YAML_CPP_INCLUDE_DIR "/deps/legoloam/yaml-cpp/include/")
-
-SET(PCL_LIBRARY_DIR "/home/yuhao/slambench/deps/pcl/lib/")
-SET(CERES_LIBRARY_DIR "/deps/aloam/ceres/lib/")
-SET(YAML_CPP_LIBRARY_DIR "/deps/legoloam/yaml-cpp/lib/")
-
 file(GLOB PCL_LIBRARIES "${PCL_LIBRARY_DIR}/libpcl_*.so*")
 file(GLOB YAML_CPP_LIBRARIES "${YAML_CPP_LIBRARY_DIR}/libyaml-cpp.a")
 set(CERES_LIBRARIES

@@ -109,14 +109,6 @@ bool sb_init_slam_system(SLAMBenchLibraryHelper *slam_settings) {
     std::cout << "dataset_name: " << dataset_name << std::endl;
     std::cout << "show_point_cloud: " << show_point_cloud << std::endl;
 
-    auto tmp_align_mat = lidar_sensor->Pose.block<3, 3>(0, 0);
-
-    if (dataset_name == "KITTI" && tmp_align_mat.array().abs().maxCoeff() != 0.0) {
-        std::cout << "Rotate to align to KITTI left camera coordinate" << std::endl;
-        std::cout << tmp_align_mat << std::endl;
-        align_mat.block<3, 3>(0, 0) = tmp_align_mat;
-    }
-
     // ================================Start Fast-LOAM================================
     if (!floam.Init()) {
         std::cerr << "Failed to initialize slam system." << std::endl;

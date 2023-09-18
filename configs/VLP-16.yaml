@@ -6,4 +6,4 @@ min_dis: 2.0
 map_resolution: 0.4
 buffer_size: 1
 dataset_name: DARPA
-show_point_cloud: false
+show_point_cloud: true
