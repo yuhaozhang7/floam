@@ -3,6 +3,7 @@ project(floam)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -O3")
 
+file(GLOB FLANN_LIBRARIES "${FLANN_LIBRARY_DIR}/libflann*.*")
 file(GLOB PCL_LIBRARIES "${PCL_LIBRARY_DIR}/libpcl_*.so*")
 file(GLOB YAML_CPP_LIBRARIES "${YAML_CPP_LIBRARY_DIR}/libyaml-cpp.a")
 set(CERES_LIBRARIES
@@ -14,6 +15,7 @@ set(CERES_LIBRARIES
 include_directories(
 	include
   ${EIGEN3_INCLUDE_DIR}
+  ${FLANN_INCLUDE_DIR}
 	${PCL_INCLUDE_DIR}
   ${CERES_INCLUDE_DIR}
 	${YAML_CPP_INCLUDE_DIR}
@@ -31,6 +33,7 @@ install(TARGETS ${PROJECT_NAME}-original  DESTINATION  lib/)
 
 target_link_libraries(${PROJECT_NAME}-original 
   ${PROJECT_NAME}
+  ${FLANN_LIBRARIES}
   ${PCL_LIBRARIES}
   ${CERES_LIBRARIES}
   ${YAML_CPP_LIBRARIES}
