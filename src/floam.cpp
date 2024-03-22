@@ -41,8 +41,8 @@ std::pair<OdometryMessage, PointCloudMessage> FLOAM::Process() {
     OdometryMessage pose_msg = output_pair.first;
     PointCloudMessage cloud_msg = output_pair.second;
 
-    if (pose_msg.timestamp == 0.0) {
-        std::cout << "timestamp is zero, program stop" << std::endl;
+    if (pose_msg.timestamp == -1.0) {
+        std::cout << "timestamp is negative, program stop" << std::endl;
         stopFlag.store(true);
     }
 
@@ -58,8 +58,8 @@ std::pair<OdometryMessage, PointCloudMessage> FLOAM::getOutput() {
     OdometryMessage output_odom_msg;
     PointCloudMessage output_map_msg;
 
-    output_odom_msg.timestamp = 0.0;
-    output_map_msg.timestamp = 0.0;
+    output_odom_msg.timestamp = -1.0;
+    output_map_msg.timestamp = -1.0;
 
     while (elapsed_time.count() < 5000) {
 
@@ -93,13 +93,13 @@ std::pair<OdometryMessage, PointCloudMessage> FLOAM::getOutput() {
             return std::make_pair(output_odom_msg, output_map_msg);
         } else {
             std::cout << "output pose and point cloud are not synchronized !" << std::endl;
-            output_odom_msg.timestamp = 0.0;
-            output_map_msg.timestamp = 0.0;
+            output_odom_msg.timestamp = -1.0;
+            output_map_msg.timestamp = -1.0;
             return std::make_pair(output_odom_msg, output_map_msg);
         }
         
     }
-    std::cout << "output buffer is empty for over 5s, set timestamp to zero" << std::endl;
+    std::cout << "output buffer is empty for over 5s, set timestamp to negative" << std::endl;
     return std::make_pair(output_odom_msg, output_map_msg);
     // throw std::runtime_error("Timeout waiting for buffers!");
 }

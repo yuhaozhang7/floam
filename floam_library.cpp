@@ -38,10 +38,11 @@ slambench::io::LidarSensor *lidar_sensor;
 
 slambench::TimeStamp last_frame_timestamp;
 double current_timestamp;
+int floam_frame_number = 1;
 
 // Outputs
-slambench::outputs::Output *pose_output;
-slambench::outputs::Output *pointcloud_output;
+slambench::outputs::Output *floam_pose_output;
+slambench::outputs::Output *floam_pointcloud_output;
 
 // System
 FLOAM floam;
@@ -65,13 +66,13 @@ bool sb_new_slam_configuration(SLAMBenchLibraryHelper * slam_settings) {
 bool sb_init_slam_system(SLAMBenchLibraryHelper *slam_settings) {
     
     // Declare Outputs
-    pose_output = new slambench::outputs::Output("Pose", slambench::values::VT_POSE, true);
+    floam_pose_output = new slambench::outputs::Output("F-LOAM Pose", slambench::values::VT_POSE, true);
 
-    pointcloud_output = new slambench::outputs::Output("PointCloud", slambench::values::VT_POINTCLOUD, true);
-    pointcloud_output->SetKeepOnlyMostRecent(true);
+    floam_pointcloud_output = new slambench::outputs::Output("F-LOAM PointCloud", slambench::values::VT_POINTCLOUD, true);
+    floam_pointcloud_output->SetKeepOnlyMostRecent(true);
 
-    slam_settings->GetOutputManager().RegisterOutput(pose_output);
-    slam_settings->GetOutputManager().RegisterOutput(pointcloud_output);
+    slam_settings->GetOutputManager().RegisterOutput(floam_pose_output);
+    slam_settings->GetOutputManager().RegisterOutput(floam_pointcloud_output);
 
     // Inspect sensors
     lidar_sensor = (slambench::io::LidarSensor*)slam_settings->get_sensors().GetSensor(slambench::io::LidarSensor::kLidarType);
@@ -158,6 +159,8 @@ bool sb_update_frame(SLAMBenchLibraryHelper *slam_settings , slambench::io::SLAM
 
 bool sb_process_once(SLAMBenchLibraryHelper *slam_settings) {
     
+    std::cout << "Process Frame " << floam_frame_number << std::endl;
+    floam_frame_number++;
     output_pair = floam.Process();
 
     return true;
@@ -169,7 +172,7 @@ bool sb_update_outputs(SLAMBenchLibraryHelper *lib, const slambench::TimeStamp *
 
     slambench::TimeStamp ts = *ts_p;
 
-    if (pose_output->IsActive()) {
+    if (floam_pose_output->IsActive()) {
         std::lock_guard<FastLock> lock (lib->GetOutputManager().GetLock());
 
         OdometryMessage output_cdom_msg = output_pair.first;
@@ -184,10 +187,10 @@ bool sb_update_outputs(SLAMBenchLibraryHelper *lib, const slambench::TimeStamp *
         pose.block<3, 3>(0, 0) = rotation;
         pose.block<3, 1>(0, 3) = translation;
 
-		pose_output->AddPoint(ts, new slambench::values::PoseValue(align_mat * pose));
+		floam_pose_output->AddPoint(ts, new slambench::values::PoseValue(align_mat * pose));
     }
     
-    if (pointcloud_output->IsActive() && show_point_cloud) {
+    if (floam_pointcloud_output->IsActive() && show_point_cloud) {
 
         pcl::PointCloud<pcl::PointXYZI>::Ptr cloud_out_trans(new pcl::PointCloud<pcl::PointXYZI>);
         PointCloudMessage output_cloud_msg = output_pair.second;
@@ -203,7 +206,7 @@ bool sb_update_outputs(SLAMBenchLibraryHelper *lib, const slambench::TimeStamp *
 
         // Take lock only after generating the map
         std::lock_guard<FastLock> lock (lib->GetOutputManager().GetLock());
-        pointcloud_output->AddPoint(ts, slambench_point_cloud);
+        floam_pointcloud_output->AddPoint(ts, slambench_point_cloud);
     }
 
     return true;
@@ -211,8 +214,8 @@ bool sb_update_outputs(SLAMBenchLibraryHelper *lib, const slambench::TimeStamp *
 
 
 bool sb_clean_slam_system() {
-    delete pose_output;
-    delete pointcloud_output;
+    delete floam_pose_output;
+    delete floam_pointcloud_output;
     delete lidar_sensor;
     return true;
 }

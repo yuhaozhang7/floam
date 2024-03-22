@@ -4,6 +4,6 @@ scan_period: 0.1
 max_dis: 60.0
 min_dis: 2.0
 map_resolution: 0.4
-buffer_size: 1
+buffer_size: 5
 dataset_name: NewerCollege
 show_point_cloud: true
